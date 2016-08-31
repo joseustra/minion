@@ -78,10 +78,10 @@ func (c *Context) Abort() {
 }
 
 // Redirect returns a HTTP redirect to the specific location. default for 302
-func (c *Context) Redirect(location string, status ...int) {
+func (c *Context) Redirect(status int, location string) {
 	c.SetHeader("Location", location)
-	if status != nil {
-		http.Redirect(c.Writer, c.Req, location, status[0])
+	if status > 0 {
+		http.Redirect(c.Writer, c.Req, location, status)
 	} else {
 		http.Redirect(c.Writer, c.Req, location, 302)
 	}
