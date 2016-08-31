@@ -6,7 +6,6 @@ import (
 	"math"
 	"net/http"
 
-	"github.com/julienschmidt/httprouter"
 	"github.com/unrolled/render"
 )
 
@@ -109,12 +108,11 @@ func (c *Context) HTML(status int, tmpl string, data interface{}) {
 	c.render.HTML(c.Writer, status, tmpl, data)
 }
 
-func (c *Engine) createContext(w http.ResponseWriter, req *http.Request, params httprouter.Params, handlers []HandlerFunc) *Context {
+func (c *Engine) createContext(w http.ResponseWriter, req *http.Request, handlers []HandlerFunc) *Context {
 	ctx := c.pool.Get().(*Context)
 	ctx.Writer = &ctx.writer
 	ctx.Req = req
 	ctx.Keys = nil
-	ctx.Params = routerParams{req: req, params: params}
 	ctx.handlers = handlers
 	ctx.writer.reset(w)
 	ctx.index = -1

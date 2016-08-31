@@ -3,8 +3,6 @@ package minion
 import (
 	"net/http"
 	"path"
-
-	"github.com/julienschmidt/httprouter"
 )
 
 // RouterGroup TODO
@@ -43,8 +41,8 @@ func (c *RouterGroup) Group(relativePath string, fn func(*RouterGroup), handlers
 func (c *RouterGroup) Handle(httpMethod, relativePath string, handlers []HandlerFunc) {
 	absolutePath := c.calculateAbsolutePath(relativePath)
 	handlers = c.combineHandlers(handlers)
-	c.engine.router.Handle(httpMethod, absolutePath, func(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
-		ctx := c.engine.createContext(w, req, params, handlers)
+	c.engine.router.Get(absolutePath, func(w http.ResponseWriter, req *http.Request) {
+		ctx := c.engine.createContext(w, req, handlers)
 		ctx.Next()
 		ctx.Writer.WriteHeaderNow()
 		c.engine.reuseContext(ctx)
@@ -53,63 +51,96 @@ func (c *RouterGroup) Handle(httpMethod, relativePath string, handlers []Handler
 
 // Post is a shortcut for router.Handle("POST", path, handle)
 func (c *RouterGroup) Post(relativePath string, handlers ...HandlerFunc) {
-	c.Handle("POST", relativePath, handlers)
+	absolutePath := c.calculateAbsolutePath(relativePath)
+	handlers = c.combineHandlers(handlers)
+	c.engine.router.Post(absolutePath, func(w http.ResponseWriter, req *http.Request) {
+		ctx := c.engine.createContext(w, req, handlers)
+		ctx.Next()
+		ctx.Writer.WriteHeaderNow()
+		c.engine.reuseContext(ctx)
+	})
 }
 
 // Get is a shortcut for router.Handle("GET", path, handle)
 func (c *RouterGroup) Get(relativePath string, handlers ...HandlerFunc) {
-	c.Handle("GET", relativePath, handlers)
+	absolutePath := c.calculateAbsolutePath(relativePath)
+	handlers = c.combineHandlers(handlers)
+	c.engine.router.Get(absolutePath, func(w http.ResponseWriter, req *http.Request) {
+		ctx := c.engine.createContext(w, req, handlers)
+		ctx.Next()
+		ctx.Writer.WriteHeaderNow()
+		c.engine.reuseContext(ctx)
+	})
 }
 
 // Delete is a shortcut for router.Handle("DELETE", path, handle)
 func (c *RouterGroup) Delete(relativePath string, handlers ...HandlerFunc) {
-	c.Handle("DELETE", relativePath, handlers)
+	absolutePath := c.calculateAbsolutePath(relativePath)
+	handlers = c.combineHandlers(handlers)
+	c.engine.router.Delete(absolutePath, func(w http.ResponseWriter, req *http.Request) {
+		ctx := c.engine.createContext(w, req, handlers)
+		ctx.Next()
+		ctx.Writer.WriteHeaderNow()
+		c.engine.reuseContext(ctx)
+	})
 }
 
 // Patch is a shortcut for router.Handle("PATCH", path, handle)
 func (c *RouterGroup) Patch(relativePath string, handlers ...HandlerFunc) {
-	c.Handle("PATCH", relativePath, handlers)
+	absolutePath := c.calculateAbsolutePath(relativePath)
+	handlers = c.combineHandlers(handlers)
+	c.engine.router.Patch(absolutePath, func(w http.ResponseWriter, req *http.Request) {
+		ctx := c.engine.createContext(w, req, handlers)
+		ctx.Next()
+		ctx.Writer.WriteHeaderNow()
+		c.engine.reuseContext(ctx)
+	})
 }
 
 // Put is a shortcut for router.Handle("PUT", path, handle)
 func (c *RouterGroup) Put(relativePath string, handlers ...HandlerFunc) {
-	c.Handle("PUT", relativePath, handlers)
+	absolutePath := c.calculateAbsolutePath(relativePath)
+	handlers = c.combineHandlers(handlers)
+	c.engine.router.Put(absolutePath, func(w http.ResponseWriter, req *http.Request) {
+		ctx := c.engine.createContext(w, req, handlers)
+		ctx.Next()
+		ctx.Writer.WriteHeaderNow()
+		c.engine.reuseContext(ctx)
+	})
 }
 
 // Options is a shortcut for router.Handle("OPTIONS", path, handle)
 func (c *RouterGroup) Options(relativePath string, handlers ...HandlerFunc) {
-	c.Handle("OPTIONS", relativePath, handlers)
+	absolutePath := c.calculateAbsolutePath(relativePath)
+	handlers = c.combineHandlers(handlers)
+	c.engine.router.Options(absolutePath, func(w http.ResponseWriter, req *http.Request) {
+		ctx := c.engine.createContext(w, req, handlers)
+		ctx.Next()
+		ctx.Writer.WriteHeaderNow()
+		c.engine.reuseContext(ctx)
+	})
 }
 
 // Head is a shortcut for router.Handle("HEAD", path, handle)
 func (c *RouterGroup) Head(relativePath string, handlers ...HandlerFunc) {
-	c.Handle("HEAD", relativePath, handlers)
-}
-
-// Any is a shortcut for all request methods
-func (c *RouterGroup) Any(relativePath string, handlers ...HandlerFunc) {
-	c.Handle("GET", relativePath, handlers)
-	c.Handle("POST", relativePath, handlers)
-	c.Handle("PUT", relativePath, handlers)
-	c.Handle("PATCH", relativePath, handlers)
-	c.Handle("HEAD", relativePath, handlers)
-	c.Handle("OPTIONS", relativePath, handlers)
-	c.Handle("DELETE", relativePath, handlers)
-	c.Handle("CONNECT", relativePath, handlers)
-	c.Handle("TRACE", relativePath, handlers)
+	absolutePath := c.calculateAbsolutePath(relativePath)
+	handlers = c.combineHandlers(handlers)
+	c.engine.router.Head(absolutePath, func(w http.ResponseWriter, req *http.Request) {
+		ctx := c.engine.createContext(w, req, handlers)
+		ctx.Next()
+		ctx.Writer.WriteHeaderNow()
+		c.engine.reuseContext(ctx)
+	})
 }
 
 // Static serves files from the given file system root.
-// Internally a http.FileServer is used, therefore http.NotFound is used instead
-// of the Router's NotFound handler.
-// To use the operating system's file system implementation,
 // use : router.Static("/static", "/var/www")
 func (c *RouterGroup) Static(path, dir string) {
 	if lastChar(path) != '/' {
 		path += "/"
 	}
 	path += "*filepath"
-	c.engine.router.ServeFiles(path, http.Dir(dir))
+	c.engine.router.FileServer(path, http.Dir(dir))
 }
 
 func (c *RouterGroup) combineHandlers(handlers []HandlerFunc) []HandlerFunc {

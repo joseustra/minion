@@ -7,7 +7,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/julienschmidt/httprouter"
+	"github.com/pressly/chi"
 	"github.com/unrolled/render"
 )
 
@@ -24,7 +24,7 @@ type HTMLEngine interface {
 // Engine TODO
 type Engine struct {
 	*RouterGroup
-	router     *httprouter.Router
+	router     *chi.Mux
 	allNoRoute []HandlerFunc
 	pool       sync.Pool
 	options    Options
@@ -51,8 +51,8 @@ func New(opts Options) *Engine {
 		engine:       engine,
 	}
 	engine.options = opts
-	engine.router = httprouter.New()
-	engine.router.NotFound = http.HandlerFunc(engine.handle404)
+	engine.router = chi.NewRouter()
+	//	engine.router.NotFound = http.HandlerFunc(engine.handle404)
 	engine.pool.New = func() interface{} {
 		ctx := &Context{
 			Engine: engine,
@@ -99,7 +99,7 @@ func (c *Engine) RunTLS(port int, cert string, key string) error {
 }
 
 func (c *Engine) handle404(w http.ResponseWriter, req *http.Request) {
-	ctx := c.createContext(w, req, nil, c.allNoRoute)
+	ctx := c.createContext(w, req, c.allNoRoute)
 	ctx.Writer.WriteHeader(404)
 	ctx.Next()
 	if !ctx.Writer.Written() {
