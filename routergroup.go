@@ -136,10 +136,6 @@ func (c *RouterGroup) Head(relativePath string, handlers ...HandlerFunc) {
 // Static serves files from the given file system root.
 // use : router.Static("/static", "/var/www")
 func (c *RouterGroup) Static(path, dir string) {
-	if lastChar(path) != '/' {
-		path += "/"
-	}
-	path += "*filepath"
 	c.engine.router.FileServer(path, http.Dir(dir))
 }
 
