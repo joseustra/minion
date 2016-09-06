@@ -6,6 +6,7 @@ import (
 	"math"
 	"net/http"
 
+	"github.com/google/jsonapi"
 	"github.com/unrolled/render"
 )
 
@@ -106,6 +107,24 @@ func (c *Context) Text(status int, data string) {
 // HTML renders the html template and sets the Content-Type to "text/html".
 func (c *Context) HTML(status int, tmpl string, data interface{}) {
 	c.render.HTML(c.Writer, status, tmpl, data)
+}
+
+// MarshalOnePayload marshal the struct and return as jsonaapi
+func (c *Context) MarshalOnePayload(status int, model interface{}) {
+	c.Writer.WriteHeader(status)
+	c.Writer.Header().Set("Content-Type", "application/vnd.api+json")
+	if err := jsonapi.MarshalOnePayload(c.Writer, model); err != nil {
+		http.Error(c.Writer, err.Error(), 500)
+	}
+}
+
+// MarshalManyPayload marshal the struct and return as jsonaapi
+func (c *Context) MarshalManyPayload(status int, models []interface{}) {
+	c.Writer.WriteHeader(status)
+	c.Writer.Header().Set("Content-Type", "application/vnd.api+json")
+	if err := jsonapi.MarshalManyPayload(c.Writer, models); err != nil {
+		http.Error(c.Writer, err.Error(), 500)
+	}
 }
 
 func (c *Engine) createContext(w http.ResponseWriter, req *http.Request, handlers []HandlerFunc) *Context {
