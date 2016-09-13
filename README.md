@@ -5,7 +5,7 @@
 ## Credits and Thanks
 
 * [Neko](https://github.com/rocwong/neko)
-* [Httprouter](https://github.com/julienschmidt/httprouter)
+* [Chi](https://github.com/pressly/chi)
 
 ## License
 Minion is licensed under the MIT
