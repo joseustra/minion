@@ -22,7 +22,6 @@ type Context struct {
 	writer   writer
 	handlers []HandlerFunc
 	index    int8
-	HTMLEngine
 }
 
 const (
@@ -83,7 +82,7 @@ func (c *Context) Redirect(status int, location string) {
 	if status > 0 {
 		http.Redirect(c.Writer, c.Req, location, status)
 	} else {
-		http.Redirect(c.Writer, c.Req, location, 302)
+		http.Redirect(c.Writer, c.Req, location, http.StatusTemporaryRedirect)
 	}
 }
 

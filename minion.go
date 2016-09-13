@@ -16,11 +16,6 @@ var l = log.New(os.Stdout, "[minion] ", 0)
 // HandlerFunc TODO
 type HandlerFunc func(*Context)
 
-// HTMLEngine TODO
-type HTMLEngine interface {
-	Render(view string, context interface{}, status ...int) error
-}
-
 // Engine TODO
 type Engine struct {
 	*RouterGroup
