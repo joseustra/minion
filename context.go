@@ -16,7 +16,6 @@ type Context struct {
 	Req      *http.Request
 	Session  Session
 	Keys     map[string]interface{}
-	Params   routerParams
 	Engine   *Engine
 	render   *render.Render
 	writer   writer
