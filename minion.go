@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/pressly/chi"
+	"github.com/rs/cors"
 	"github.com/unrolled/render"
 )
 
@@ -75,9 +76,13 @@ func (c *Engine) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 // Run run the http server.
 func (c *Engine) Run(port int) error {
+	crs := cors.New(cors.Options{
+		AllowedOrigins: c.options.Cors,
+	})
+
 	addr := fmt.Sprintf(":%d", port)
 	l.Printf("Starting server on port [%d]\n", port)
-	if err := http.ListenAndServe(addr, WriteLog(c)); err != nil {
+	if err := http.ListenAndServe(addr, crs.Handler(WriteLog(c))); err != nil {
 		return err
 	}
 	return nil
