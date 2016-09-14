@@ -19,7 +19,7 @@ type HandlerFunc func(*Context)
 
 // Engine TODO
 type Engine struct {
-	*RouterGroup
+	*Router
 	router     *chi.Mux
 	allNoRoute []HandlerFunc
 	pool       sync.Pool
@@ -42,7 +42,7 @@ type Options struct {
 // New returns a new blank Engine instance without any middleware attached.
 func New(opts Options) *Engine {
 	engine := &Engine{}
-	engine.RouterGroup = &RouterGroup{
+	engine.Router = &Router{
 		absolutePath: "/",
 		engine:       engine,
 	}
@@ -65,7 +65,7 @@ func New(opts Options) *Engine {
 
 // Use add middlewares to be used on applicaton
 func (c *Engine) Use(middlewares ...HandlerFunc) {
-	c.RouterGroup.Use(middlewares...)
+	c.Router.Use(middlewares...)
 	c.allNoRoute = c.combineHandlers(nil)
 }
 

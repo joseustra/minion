@@ -5,22 +5,22 @@ import (
 	"path"
 )
 
-// RouterGroup TODO
-type RouterGroup struct {
+// Router TODO
+type Router struct {
 	Handlers     []HandlerFunc
 	absolutePath string
 	engine       *Engine
 }
 
 // Use Adds middlewares to the group
-func (c *RouterGroup) Use(middlewares ...HandlerFunc) {
+func (c *Router) Use(middlewares ...HandlerFunc) {
 	c.Handlers = append(c.Handlers, middlewares...)
 }
 
 // Group Creates a new router group. You should add all the routes that have common middlwares or the same path prefix.
 // For example, all the routes that use a common middlware for authorization could be grouped.
-func (c *RouterGroup) Group(relativePath string, fn func(*RouterGroup), handlers ...HandlerFunc) *RouterGroup {
-	router := &RouterGroup{
+func (c *Router) Group(relativePath string, fn func(*Router), handlers ...HandlerFunc) *Router {
+	router := &Router{
 		Handlers:     c.combineHandlers(handlers),
 		absolutePath: c.calculateAbsolutePath(relativePath),
 		engine:       c.engine,
@@ -38,7 +38,7 @@ func (c *RouterGroup) Group(relativePath string, fn func(*RouterGroup), handlers
 // This function is intended for bulk loading and to allow the usage of less
 // frequently used, non-standardized or custom methods (e.g. for internal
 // communication with a proxy).
-func (c *RouterGroup) Handle(httpMethod, relativePath string, handlers []HandlerFunc) {
+func (c *Router) Handle(httpMethod, relativePath string, handlers []HandlerFunc) {
 	absolutePath := c.calculateAbsolutePath(relativePath)
 	handlers = c.combineHandlers(handlers)
 	c.engine.router.Get(absolutePath, func(w http.ResponseWriter, req *http.Request) {
@@ -50,7 +50,7 @@ func (c *RouterGroup) Handle(httpMethod, relativePath string, handlers []Handler
 }
 
 // Post is a shortcut for router.Handle("POST", path, handle)
-func (c *RouterGroup) Post(relativePath string, handlers ...HandlerFunc) {
+func (c *Router) Post(relativePath string, handlers ...HandlerFunc) {
 	absolutePath := c.calculateAbsolutePath(relativePath)
 	handlers = c.combineHandlers(handlers)
 	c.engine.router.Post(absolutePath, func(w http.ResponseWriter, req *http.Request) {
@@ -62,7 +62,7 @@ func (c *RouterGroup) Post(relativePath string, handlers ...HandlerFunc) {
 }
 
 // Get is a shortcut for router.Handle("GET", path, handle)
-func (c *RouterGroup) Get(relativePath string, handlers ...HandlerFunc) {
+func (c *Router) Get(relativePath string, handlers ...HandlerFunc) {
 	absolutePath := c.calculateAbsolutePath(relativePath)
 	handlers = c.combineHandlers(handlers)
 	c.engine.router.Get(absolutePath, func(w http.ResponseWriter, req *http.Request) {
@@ -74,7 +74,7 @@ func (c *RouterGroup) Get(relativePath string, handlers ...HandlerFunc) {
 }
 
 // Delete is a shortcut for router.Handle("DELETE", path, handle)
-func (c *RouterGroup) Delete(relativePath string, handlers ...HandlerFunc) {
+func (c *Router) Delete(relativePath string, handlers ...HandlerFunc) {
 	absolutePath := c.calculateAbsolutePath(relativePath)
 	handlers = c.combineHandlers(handlers)
 	c.engine.router.Delete(absolutePath, func(w http.ResponseWriter, req *http.Request) {
@@ -86,7 +86,7 @@ func (c *RouterGroup) Delete(relativePath string, handlers ...HandlerFunc) {
 }
 
 // Patch is a shortcut for router.Handle("PATCH", path, handle)
-func (c *RouterGroup) Patch(relativePath string, handlers ...HandlerFunc) {
+func (c *Router) Patch(relativePath string, handlers ...HandlerFunc) {
 	absolutePath := c.calculateAbsolutePath(relativePath)
 	handlers = c.combineHandlers(handlers)
 	c.engine.router.Patch(absolutePath, func(w http.ResponseWriter, req *http.Request) {
@@ -98,7 +98,7 @@ func (c *RouterGroup) Patch(relativePath string, handlers ...HandlerFunc) {
 }
 
 // Put is a shortcut for router.Handle("PUT", path, handle)
-func (c *RouterGroup) Put(relativePath string, handlers ...HandlerFunc) {
+func (c *Router) Put(relativePath string, handlers ...HandlerFunc) {
 	absolutePath := c.calculateAbsolutePath(relativePath)
 	handlers = c.combineHandlers(handlers)
 	c.engine.router.Put(absolutePath, func(w http.ResponseWriter, req *http.Request) {
@@ -110,7 +110,7 @@ func (c *RouterGroup) Put(relativePath string, handlers ...HandlerFunc) {
 }
 
 // Options is a shortcut for router.Handle("OPTIONS", path, handle)
-func (c *RouterGroup) Options(relativePath string, handlers ...HandlerFunc) {
+func (c *Router) Options(relativePath string, handlers ...HandlerFunc) {
 	absolutePath := c.calculateAbsolutePath(relativePath)
 	handlers = c.combineHandlers(handlers)
 	c.engine.router.Options(absolutePath, func(w http.ResponseWriter, req *http.Request) {
@@ -122,7 +122,7 @@ func (c *RouterGroup) Options(relativePath string, handlers ...HandlerFunc) {
 }
 
 // Head is a shortcut for router.Handle("HEAD", path, handle)
-func (c *RouterGroup) Head(relativePath string, handlers ...HandlerFunc) {
+func (c *Router) Head(relativePath string, handlers ...HandlerFunc) {
 	absolutePath := c.calculateAbsolutePath(relativePath)
 	handlers = c.combineHandlers(handlers)
 	c.engine.router.Head(absolutePath, func(w http.ResponseWriter, req *http.Request) {
@@ -135,18 +135,18 @@ func (c *RouterGroup) Head(relativePath string, handlers ...HandlerFunc) {
 
 // Static serves files from the given file system root.
 // use : router.Static("/static", "/var/www")
-func (c *RouterGroup) Static(path, dir string) {
+func (c *Router) Static(path, dir string) {
 	c.engine.router.FileServer(path, http.Dir(dir))
 }
 
-func (c *RouterGroup) combineHandlers(handlers []HandlerFunc) []HandlerFunc {
+func (c *Router) combineHandlers(handlers []HandlerFunc) []HandlerFunc {
 	finalSize := len(c.Handlers) + len(handlers)
 	mergedHandlers := make([]HandlerFunc, 0, finalSize)
 	mergedHandlers = append(mergedHandlers, c.Handlers...)
 	return append(mergedHandlers, handlers...)
 }
 
-func (c *RouterGroup) calculateAbsolutePath(relativePath string) string {
+func (c *Router) calculateAbsolutePath(relativePath string) string {
 	if len(relativePath) == 0 {
 		return c.absolutePath
 	}
