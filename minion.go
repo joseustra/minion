@@ -93,21 +93,6 @@ func (c *Engine) RunTLS(port int, cert string, key string) error {
 	return nil
 }
 
-func (c *Engine) handle404(w http.ResponseWriter, req *http.Request) {
-	ctx := c.createContext(w, req, c.allNoRoute)
-	ctx.Writer.WriteHeader(404)
-	ctx.Next()
-	if !ctx.Writer.Written() {
-		if ctx.Writer.Status() == 404 {
-			ctx.Writer.Header().Set("Content-Type", "text/html")
-			ctx.Writer.Write([]byte(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>404 PAGE NOT FOUND</title></head><body style="padding:0;text-align:center;"><div style="padding-top:1em;font-size:2.5em;">404 PAGE NOT FOUND</div><div style="font-size:1em;color:#999;">Powered by Minion</div></body></html>`))
-		} else {
-			ctx.Writer.WriteHeader(ctx.Writer.Status())
-		}
-	}
-	c.reuseContext(ctx)
-}
-
 const (
 	// DEV runs the server in development mode
 	DEV string = "development"
