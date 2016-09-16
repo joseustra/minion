@@ -48,7 +48,6 @@ func New(opts Options) *Engine {
 	}
 	engine.options = opts
 	engine.router = chi.NewRouter()
-	//	engine.router.NotFound = http.HandlerFunc(engine.handle404)
 	engine.pool.New = func() interface{} {
 		ctx := &Context{
 			Engine: engine,
