@@ -21,4 +21,8 @@ func TestCalculateAbsolutePath(t *testing.T) {
 	router = &Router{namespace: "/api"}
 	path = router.calculateAbsolutePath("")
 	tst.AssertEqual(t, "/api", path)
+
+	router = &Router{namespace: "/api"}
+	path = router.calculateAbsolutePath("/users/")
+	tst.AssertEqual(t, "/api/users/", path)
 }
