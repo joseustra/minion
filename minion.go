@@ -43,8 +43,8 @@ type Options struct {
 func New(opts Options) *Engine {
 	engine := &Engine{}
 	engine.Router = &Router{
-		absolutePath: "/",
-		engine:       engine,
+		namespace: "/",
+		engine:    engine,
 	}
 	engine.options = opts
 	engine.router = chi.NewRouter()

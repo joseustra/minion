@@ -7,9 +7,9 @@ import (
 
 // Router TODO
 type Router struct {
-	Handlers     []HandlerFunc
-	absolutePath string
-	engine       *Engine
+	Handlers  []HandlerFunc
+	namespace string
+	engine    *Engine
 }
 
 // Use Adds middlewares to the group
@@ -21,9 +21,9 @@ func (c *Router) Use(middlewares ...HandlerFunc) {
 // For example, all the routes that use a common middlware for authorization could be grouped.
 func (c *Router) Group(relativePath string, fn func(*Router), handlers ...HandlerFunc) *Router {
 	router := &Router{
-		Handlers:     c.combineHandlers(handlers),
-		absolutePath: c.calculateAbsolutePath(relativePath),
-		engine:       c.engine,
+		Handlers:  c.combineHandlers(handlers),
+		namespace: c.calculateAbsolutePath(relativePath),
+		engine:    c.engine,
 	}
 	fn(router)
 	return router
@@ -148,9 +148,9 @@ func (c *Router) combineHandlers(handlers []HandlerFunc) []HandlerFunc {
 
 func (c *Router) calculateAbsolutePath(relativePath string) string {
 	if len(relativePath) == 0 {
-		return c.absolutePath
+		return c.namespace
 	}
-	absolutePath := path.Join(c.absolutePath, relativePath)
+	absolutePath := path.Join(c.namespace, relativePath)
 	appendSlash := lastChar(relativePath) == '/' && lastChar(absolutePath) != '/'
 	if appendSlash {
 		return absolutePath + "/"
