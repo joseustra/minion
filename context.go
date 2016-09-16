@@ -1,8 +1,6 @@
 package minion
 
 import (
-	"errors"
-	"log"
 	"math"
 	"net/http"
 
@@ -15,7 +13,6 @@ type Context struct {
 	Writer   ResponseWriter
 	Req      *http.Request
 	Session  Session
-	Keys     map[string]interface{}
 	Engine   *Engine
 	render   *render.Render
 	writer   writer
@@ -35,34 +32,6 @@ func (c *Context) Next() {
 	for ; c.index < s; c.index++ {
 		c.handlers[c.index](c)
 	}
-}
-
-// Set Sets a new pair key/value just for the specified context.
-func (c *Context) Set(key string, item interface{}) {
-	if c.Keys == nil {
-		c.Keys = make(map[string]interface{})
-	}
-	c.Keys[key] = item
-}
-
-// Get returns the value for the given key or an error if the key does not exist.
-func (c *Context) Get(key string) (interface{}, error) {
-	if c.Keys != nil {
-		value, ok := c.Keys[key]
-		if ok {
-			return value, nil
-		}
-	}
-	return nil, errors.New("Key does not exist.")
-}
-
-// MustGet returns the value for the given key or panics if the value doesn't exist.
-func (c *Context) MustGet(key string) interface{} {
-	value, err := c.Get(key)
-	if err != nil || value == nil {
-		log.Panicf("Key %s doesn't exist", value)
-	}
-	return value
 }
 
 // SetHeader sets a response header.
@@ -129,7 +98,6 @@ func (c *Engine) createContext(w http.ResponseWriter, req *http.Request, handler
 	ctx := c.pool.Get().(*Context)
 	ctx.Writer = &ctx.writer
 	ctx.Req = req
-	ctx.Keys = nil
 	ctx.handlers = handlers
 	ctx.writer.reset(w)
 	ctx.index = -1
