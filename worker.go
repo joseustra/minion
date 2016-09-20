@@ -1,8 +1,10 @@
 package minion
 
 // Job a job to be added to a worker needs implements this interface
-// the Exec func will be executed on the worker
-type Job func() error
+// type Job func(i interface{}) error
+type Job interface {
+	Exec() error
+}
 
 // NewWorker creates a worker
 func NewWorker(id int, workerQueue chan chan Job) Worker {
@@ -31,7 +33,7 @@ func (w *Worker) Start() {
 
 			select {
 			case work := <-w.Work:
-				work()
+				work.Exec()
 
 			case <-w.QuitChan:
 				return
