@@ -1,4 +1,4 @@
-package minion
+package worker
 
 // Job a job to be added to a worker needs implements this interface
 // type Job func(i interface{}) error
