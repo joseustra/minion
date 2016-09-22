@@ -17,15 +17,19 @@ func (c *Router) Use(middlewares ...HandlerFunc) {
 	c.Handlers = append(c.Handlers, middlewares...)
 }
 
+func (c *Router) handleContext(w http.ResponseWriter, req *http.Request, handlers []HandlerFunc) {
+	ctx := c.engine.createContext(w, req, handlers)
+	ctx.Next()
+	ctx.Writer.WriteHeaderNow()
+	c.engine.reuseContext(ctx)
+}
+
 // Post is a shortcut for router.Handle("POST", path, handle)
 func (c *Router) Post(relativePath string, handlers ...HandlerFunc) {
 	namespace := c.calculateAbsolutePath(relativePath)
 	handlers = c.combineHandlers(handlers)
 	c.engine.router.Post(namespace, func(w http.ResponseWriter, req *http.Request) {
-		ctx := c.engine.createContext(w, req, handlers)
-		ctx.Next()
-		ctx.Writer.WriteHeaderNow()
-		c.engine.reuseContext(ctx)
+		c.handleContext(w, req, handlers)
 	})
 }
 
@@ -34,10 +38,7 @@ func (c *Router) Get(relativePath string, handlers ...HandlerFunc) {
 	namespace := c.calculateAbsolutePath(relativePath)
 	handlers = c.combineHandlers(handlers)
 	c.engine.router.Get(namespace, func(w http.ResponseWriter, req *http.Request) {
-		ctx := c.engine.createContext(w, req, handlers)
-		ctx.Next()
-		ctx.Writer.WriteHeaderNow()
-		c.engine.reuseContext(ctx)
+		c.handleContext(w, req, handlers)
 	})
 }
 
@@ -46,10 +47,7 @@ func (c *Router) Delete(relativePath string, handlers ...HandlerFunc) {
 	namespace := c.calculateAbsolutePath(relativePath)
 	handlers = c.combineHandlers(handlers)
 	c.engine.router.Delete(namespace, func(w http.ResponseWriter, req *http.Request) {
-		ctx := c.engine.createContext(w, req, handlers)
-		ctx.Next()
-		ctx.Writer.WriteHeaderNow()
-		c.engine.reuseContext(ctx)
+		c.handleContext(w, req, handlers)
 	})
 }
 
@@ -58,10 +56,7 @@ func (c *Router) Patch(relativePath string, handlers ...HandlerFunc) {
 	namespace := c.calculateAbsolutePath(relativePath)
 	handlers = c.combineHandlers(handlers)
 	c.engine.router.Patch(namespace, func(w http.ResponseWriter, req *http.Request) {
-		ctx := c.engine.createContext(w, req, handlers)
-		ctx.Next()
-		ctx.Writer.WriteHeaderNow()
-		c.engine.reuseContext(ctx)
+		c.handleContext(w, req, handlers)
 	})
 }
 
@@ -70,10 +65,7 @@ func (c *Router) Put(relativePath string, handlers ...HandlerFunc) {
 	namespace := c.calculateAbsolutePath(relativePath)
 	handlers = c.combineHandlers(handlers)
 	c.engine.router.Put(namespace, func(w http.ResponseWriter, req *http.Request) {
-		ctx := c.engine.createContext(w, req, handlers)
-		ctx.Next()
-		ctx.Writer.WriteHeaderNow()
-		c.engine.reuseContext(ctx)
+		c.handleContext(w, req, handlers)
 	})
 }
 
@@ -82,10 +74,7 @@ func (c *Router) Options(relativePath string, handlers ...HandlerFunc) {
 	namespace := c.calculateAbsolutePath(relativePath)
 	handlers = c.combineHandlers(handlers)
 	c.engine.router.Options(namespace, func(w http.ResponseWriter, req *http.Request) {
-		ctx := c.engine.createContext(w, req, handlers)
-		ctx.Next()
-		ctx.Writer.WriteHeaderNow()
-		c.engine.reuseContext(ctx)
+		c.handleContext(w, req, handlers)
 	})
 }
 
@@ -94,10 +83,7 @@ func (c *Router) Head(relativePath string, handlers ...HandlerFunc) {
 	namespace := c.calculateAbsolutePath(relativePath)
 	handlers = c.combineHandlers(handlers)
 	c.engine.router.Head(namespace, func(w http.ResponseWriter, req *http.Request) {
-		ctx := c.engine.createContext(w, req, handlers)
-		ctx.Next()
-		ctx.Writer.WriteHeaderNow()
-		c.engine.reuseContext(ctx)
+		c.handleContext(w, req, handlers)
 	})
 }
 
