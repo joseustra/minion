@@ -8,6 +8,18 @@ import (
 	"github.com/gorilla/context"
 )
 
+// Middleware middleware type
+type Middleware func(http.Handler) http.Handler
+
+// Vai vai
+func Vai(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		fmt.Println("Antes")
+		next.ServeHTTP(rw, req)
+		fmt.Println("Depois")
+	})
+}
+
 // AuthenticatedRoutes authenticate routes using jwt
 func AuthenticatedRoutes(jwtToken string, unauthenticatedRoutes []string) HandlerFunc {
 	return func(ctx *Context) {

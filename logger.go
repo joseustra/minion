@@ -35,37 +35,37 @@ func (w *statusWriter) Write(b []byte) (int, error) {
 	return w.ResponseWriter.Write(b)
 }
 
-// WriteLog Logs the Http Status for all requests
-func WriteLog(handle http.Handler) http.HandlerFunc {
-	return func(w http.ResponseWriter, request *http.Request) {
+// Logger Logs the Http Status for all requests
+func Logger(handle http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		start := time.Now()
-		writer := statusWriter{w, 0, 0}
-		handle.ServeHTTP(&writer, request)
+		writer := statusWriter{rw, 0, 0}
+		handle.ServeHTTP(&writer, req)
 		end := time.Now()
 		latency := end.Sub(start)
 		statusCode := writer.status
 		statusColor := colorForStatus(statusCode)
-		methodColor := colorForMethod(request.Method)
+		methodColor := colorForMethod(req.Method)
 
-		if request.URL.RawQuery != "" {
+		if req.URL.RawQuery != "" {
 			l.Printf("%v |%s %-8s %s|%s %d %2s| %s | %12v | %s?%s",
 				end.Format("2006/01/02 15:04:05"),
-				methodColor, request.Method, reset,
+				methodColor, req.Method, reset,
 				statusColor, statusCode, reset,
-				request.RemoteAddr,
+				req.RemoteAddr,
 				latency,
-				request.URL.Path,
-				request.URL.RawQuery)
+				req.URL.Path,
+				req.URL.RawQuery)
 		} else {
 			l.Printf("%v |%s %-8s %s|%s %d %2s| %s | %12v | %s",
 				end.Format("2006/01/02 15:04:05"),
-				methodColor, request.Method, reset,
+				methodColor, req.Method, reset,
 				statusColor, statusCode, reset,
-				request.RemoteAddr,
+				req.RemoteAddr,
 				latency,
-				request.URL.Path)
+				req.URL.Path)
 		}
-	}
+	})
 }
 
 func colorForStatus(code int) string {
