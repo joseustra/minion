@@ -21,8 +21,6 @@ type HandlerFunc func(*Context)
 type Engine struct {
 	*Router
 	parent      *Router
-	router      *chi.Mux
-	allNoRoute  []HandlerFunc
 	middlewares []Middleware
 	pool        sync.Pool
 	options     Options
@@ -47,9 +45,9 @@ func New(opts Options) *Engine {
 	engine.Router = &Router{
 		namespace: "/",
 		engine:    engine,
+		mux:       chi.NewRouter(),
 	}
 	engine.options = opts
-	engine.router = chi.NewRouter()
 	engine.pool.New = func() interface{} {
 		ctx := &Context{
 			Engine: engine,
@@ -73,12 +71,12 @@ func New(opts Options) *Engine {
 
 // Use add middlewares to be used on applicaton
 func (c *Engine) Use(middleware Middleware) {
-	c.router.Use(middleware)
+	c.Router.mux.Use(middleware)
 }
 
 // ServeHTTP makes the router implement the http.Handler interface.
 func (c *Engine) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	c.router.ServeHTTP(res, req)
+	c.Router.mux.ServeHTTP(res, req)
 }
 
 // Run run the http server.
