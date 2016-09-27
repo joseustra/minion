@@ -12,11 +12,6 @@ type Router struct {
 	engine    *Engine
 }
 
-// Use Adds middlewares to the group
-func (c *Router) Use(middlewares ...HandlerFunc) {
-	c.Handlers = append(c.Handlers, middlewares...)
-}
-
 func (c *Router) handleContext(w http.ResponseWriter, req *http.Request, handlers []HandlerFunc) {
 	ctx := c.engine.createContext(w, req, handlers)
 	ctx.Next()

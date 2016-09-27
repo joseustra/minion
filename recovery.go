@@ -77,14 +77,13 @@ func function(pc uintptr) []byte {
 }
 
 // Recovery returns a middleware that recovers from any panics and writes a 500 if there was one.
-func (ctx *Context) Recovery(next http.Handler) http.Handler {
+func Recovery(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
 				stack := stack(3)
 				l.Printf("PANIC: %s\n%s", err, stack)
-				// ctx.Writer.WriteHeader(http.StatusInternalServerError)
-				// ctx.Abort()
+				http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			}
 		}()
 
