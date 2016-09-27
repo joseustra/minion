@@ -43,7 +43,6 @@ func AuthenticatedRoutes(jwtToken string, unauthenticatedRoutes []string) Handle
 				} else {
 					ctx.Writer.WriteHeader(http.StatusUnauthorized)
 					ctx.Writer.Write([]byte("Invalid token"))
-					ctx.Writer.WriteHeaderNow()
 					ctx.Abort()
 					return
 				}
@@ -51,13 +50,11 @@ func AuthenticatedRoutes(jwtToken string, unauthenticatedRoutes []string) Handle
 				if err != nil {
 					ctx.Writer.WriteHeader(http.StatusUnauthorized)
 					ctx.Writer.Write([]byte(err.Error()))
-					ctx.Writer.WriteHeaderNow()
 					ctx.Abort()
 					return
 				} else if !token.Valid {
 					ctx.Writer.WriteHeader(http.StatusUnauthorized)
 					ctx.Writer.Write([]byte("invalid authorization token"))
-					ctx.Writer.WriteHeaderNow()
 					ctx.Abort()
 					return
 				}

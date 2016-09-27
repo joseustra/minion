@@ -15,7 +15,6 @@ type Router struct {
 func (c *Router) handleContext(w http.ResponseWriter, req *http.Request, handlers []HandlerFunc) {
 	ctx := c.engine.createContext(w, req, handlers)
 	ctx.Next()
-	ctx.Writer.WriteHeaderNow()
 	c.engine.reuseContext(ctx)
 }
 

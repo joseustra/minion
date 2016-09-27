@@ -10,12 +10,12 @@ import (
 
 // Context the context of each request
 type Context struct {
-	Writer   ResponseWriter
-	Req      *http.Request
-	Session  Session
-	Engine   *Engine
-	render   *render.Render
-	writer   writer
+	Writer  http.ResponseWriter
+	Req     *http.Request
+	Session Session
+	Engine  *Engine
+	render  *render.Render
+	// writer   writer
 	handlers []HandlerFunc
 	index    int8
 }
@@ -94,12 +94,11 @@ func (c *Context) MarshalManyPayload(status int, models []interface{}) {
 	}
 }
 
-func (c *Engine) createContext(w http.ResponseWriter, req *http.Request, handlers []HandlerFunc) *Context {
+func (c *Engine) createContext(rw http.ResponseWriter, req *http.Request, handlers []HandlerFunc) *Context {
 	ctx := c.pool.Get().(*Context)
-	ctx.Writer = &ctx.writer
+	ctx.Writer = rw
 	ctx.Req = req
 	ctx.handlers = handlers
-	ctx.writer.reset(w)
 	ctx.index = -1
 	return ctx
 }
