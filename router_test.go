@@ -9,6 +9,31 @@ import (
 	"github.com/ustrajunior/minion/tst"
 )
 
+func TestNamespace(t *testing.T) {
+
+	usersHandler := func(ctx *minion.Context) {
+		ctx.JSON(200, nil)
+	}
+
+	m := minion.New(minion.Options{
+		UnauthenticatedRoutes: []string{"*"},
+		Namespace:             "/v1"},
+	)
+
+	m.Get("/users", usersHandler)
+
+	ts := httptest.NewServer(m)
+	defer ts.Close()
+
+	var status int
+
+	status, _ = tst.Request(t, ts, "GET", "/v1/users", nil)
+	tst.AssertEqual(t, 200, status)
+
+	status, _ = tst.Request(t, ts, "GET", "/users", nil)
+	tst.AssertEqual(t, 404, status)
+}
+
 func TestGet(t *testing.T) {
 	john := struct {
 		Name  string `json:"name"`

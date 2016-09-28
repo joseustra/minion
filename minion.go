@@ -37,13 +37,19 @@ type Options struct {
 	JWTToken              string
 	DisableJSONApi        bool
 	UnauthenticatedRoutes []string
+	Namespace             string
 }
 
 // New returns a new blank Engine instance without any middleware attached.
 func New(opts Options) *Engine {
+	namespace := opts.Namespace
+	if len(namespace) == 0 {
+		namespace = "/"
+	}
+
 	engine := &Engine{}
 	engine.Router = &Router{
-		namespace: "/",
+		namespace: namespace,
 		engine:    engine,
 		mux:       chi.NewRouter(),
 	}

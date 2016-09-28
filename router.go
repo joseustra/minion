@@ -24,7 +24,6 @@ func (r *Router) handleContext(w http.ResponseWriter, req *http.Request, handler
 // Post is a shortcut for router.Handle("POST", path, handle)
 func (r *Router) Post(relativePath string, handlers ...HandlerFunc) {
 	namespace := r.calculateAbsolutePath(relativePath)
-	handlers = r.combineHandlers(handlers)
 	r.mux.Post(namespace, func(w http.ResponseWriter, req *http.Request) {
 		r.handleContext(w, req, handlers)
 	})
@@ -33,7 +32,6 @@ func (r *Router) Post(relativePath string, handlers ...HandlerFunc) {
 // Get is a shortcut for router.Handle("GET", path, handle)
 func (r *Router) Get(relativePath string, handlers ...HandlerFunc) {
 	namespace := r.calculateAbsolutePath(relativePath)
-	handlers = r.combineHandlers(handlers)
 	r.mux.Get(namespace, func(w http.ResponseWriter, req *http.Request) {
 		r.handleContext(w, req, handlers)
 	})
@@ -42,7 +40,6 @@ func (r *Router) Get(relativePath string, handlers ...HandlerFunc) {
 // Delete is a shortcut for router.Handle("DELETE", path, handle)
 func (r *Router) Delete(relativePath string, handlers ...HandlerFunc) {
 	namespace := r.calculateAbsolutePath(relativePath)
-	handlers = r.combineHandlers(handlers)
 	r.mux.Delete(namespace, func(w http.ResponseWriter, req *http.Request) {
 		r.handleContext(w, req, handlers)
 	})
@@ -51,7 +48,6 @@ func (r *Router) Delete(relativePath string, handlers ...HandlerFunc) {
 // Patch is a shortcut for router.Handle("PATCH", path, handle)
 func (r *Router) Patch(relativePath string, handlers ...HandlerFunc) {
 	namespace := r.calculateAbsolutePath(relativePath)
-	handlers = r.combineHandlers(handlers)
 	r.mux.Patch(namespace, func(w http.ResponseWriter, req *http.Request) {
 		r.handleContext(w, req, handlers)
 	})
@@ -60,7 +56,6 @@ func (r *Router) Patch(relativePath string, handlers ...HandlerFunc) {
 // Put is a shortcut for router.Handle("PUT", path, handle)
 func (r *Router) Put(relativePath string, handlers ...HandlerFunc) {
 	namespace := r.calculateAbsolutePath(relativePath)
-	handlers = r.combineHandlers(handlers)
 	r.mux.Put(namespace, func(w http.ResponseWriter, req *http.Request) {
 		r.handleContext(w, req, handlers)
 	})
@@ -69,7 +64,6 @@ func (r *Router) Put(relativePath string, handlers ...HandlerFunc) {
 // Options is a shortcut for router.Handle("OPTIONS", path, handle)
 func (r *Router) Options(relativePath string, handlers ...HandlerFunc) {
 	namespace := r.calculateAbsolutePath(relativePath)
-	handlers = r.combineHandlers(handlers)
 	r.mux.Options(namespace, func(w http.ResponseWriter, req *http.Request) {
 		r.handleContext(w, req, handlers)
 	})
@@ -78,7 +72,6 @@ func (r *Router) Options(relativePath string, handlers ...HandlerFunc) {
 // Head is a shortcut for router.Handle("HEAD", path, handle)
 func (r *Router) Head(relativePath string, handlers ...HandlerFunc) {
 	namespace := r.calculateAbsolutePath(relativePath)
-	handlers = r.combineHandlers(handlers)
 	r.mux.Head(namespace, func(w http.ResponseWriter, req *http.Request) {
 		r.handleContext(w, req, handlers)
 	})
@@ -88,13 +81,6 @@ func (r *Router) Head(relativePath string, handlers ...HandlerFunc) {
 // use : router.Static("/static", "/var/www")
 func (r *Router) Static(path, dir string) {
 	r.mux.FileServer(path, http.Dir(dir))
-}
-
-func (r *Router) combineHandlers(handlers []HandlerFunc) []HandlerFunc {
-	finalSize := len(r.Handlers) + len(handlers)
-	mergedHandlers := make([]HandlerFunc, 0, finalSize)
-	mergedHandlers = append(mergedHandlers, r.Handlers...)
-	return append(mergedHandlers, handlers...)
 }
 
 func (r *Router) calculateAbsolutePath(relativePath string) string {
