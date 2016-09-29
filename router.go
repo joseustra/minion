@@ -15,66 +15,65 @@ type Router struct {
 	mux       *chi.Mux
 }
 
-func (r *Router) handleContext(w http.ResponseWriter, req *http.Request, handlers []HandlerFunc) {
-	ctx := r.engine.createContext(w, req, handlers)
-	ctx.Next()
-	r.engine.reuseContext(ctx)
+func (r *Router) handle(method string, relativePath string, handlers HandlerFunc) {
+	namespace := r.calculateAbsolutePath(relativePath)
+	fn := func(w http.ResponseWriter, req *http.Request) {
+		ctx := r.engine.createContext(w, req, []HandlerFunc{handlers})
+		ctx.Next()
+		r.engine.reuseContext(ctx)
+	}
+
+	switch method {
+	case "GET":
+		r.mux.Get(namespace, fn)
+	case "POST":
+		r.mux.Post(namespace, fn)
+	case "PUT":
+		r.mux.Put(namespace, fn)
+	case "PATCH":
+		r.mux.Patch(namespace, fn)
+	case "DELETE":
+		r.mux.Delete(namespace, fn)
+	case "OPTIONS":
+		r.mux.Options(namespace, fn)
+	case "HEAD":
+		r.mux.Head(namespace, fn)
+	}
 }
 
 // Post handle the POST requests
-func (r *Router) Post(relativePath string, handlers ...HandlerFunc) {
-	namespace := r.calculateAbsolutePath(relativePath)
-	r.mux.Post(namespace, func(w http.ResponseWriter, req *http.Request) {
-		r.handleContext(w, req, handlers)
-	})
+func (r *Router) Post(relativePath string, handlers HandlerFunc) {
+	r.handle("POST", relativePath, handlers)
 }
 
 // Get handle the GET requets
-func (r *Router) Get(relativePath string, handlers ...HandlerFunc) {
-	namespace := r.calculateAbsolutePath(relativePath)
-	r.mux.Get(namespace, func(w http.ResponseWriter, req *http.Request) {
-		r.handleContext(w, req, handlers)
-	})
+func (r *Router) Get(relativePath string, handlers HandlerFunc) {
+	r.handle("GET", relativePath, handlers)
 }
 
 // Delete handle the DELETE requests
-func (r *Router) Delete(relativePath string, handlers ...HandlerFunc) {
-	namespace := r.calculateAbsolutePath(relativePath)
-	r.mux.Delete(namespace, func(w http.ResponseWriter, req *http.Request) {
-		r.handleContext(w, req, handlers)
-	})
+func (r *Router) Delete(relativePath string, handlers HandlerFunc) {
+	r.handle("DELETE", relativePath, handlers)
 }
 
 // Patch handle the PATCH requests
-func (r *Router) Patch(relativePath string, handlers ...HandlerFunc) {
-	namespace := r.calculateAbsolutePath(relativePath)
-	r.mux.Patch(namespace, func(w http.ResponseWriter, req *http.Request) {
-		r.handleContext(w, req, handlers)
-	})
+func (r *Router) Patch(relativePath string, handlers HandlerFunc) {
+	r.handle("PATCH", relativePath, handlers)
 }
 
 // Put handle the PUT requests
-func (r *Router) Put(relativePath string, handlers ...HandlerFunc) {
-	namespace := r.calculateAbsolutePath(relativePath)
-	r.mux.Put(namespace, func(w http.ResponseWriter, req *http.Request) {
-		r.handleContext(w, req, handlers)
-	})
+func (r *Router) Put(relativePath string, handlers HandlerFunc) {
+	r.handle("PUT", relativePath, handlers)
 }
 
 // Options handle the OPTIONS requests
-func (r *Router) Options(relativePath string, handlers ...HandlerFunc) {
-	namespace := r.calculateAbsolutePath(relativePath)
-	r.mux.Options(namespace, func(w http.ResponseWriter, req *http.Request) {
-		r.handleContext(w, req, handlers)
-	})
+func (r *Router) Options(relativePath string, handlers HandlerFunc) {
+	r.handle("OPTIONS", relativePath, handlers)
 }
 
 // Head handle the HEAD requests
-func (r *Router) Head(relativePath string, handlers ...HandlerFunc) {
-	namespace := r.calculateAbsolutePath(relativePath)
-	r.mux.Head(namespace, func(w http.ResponseWriter, req *http.Request) {
-		r.handleContext(w, req, handlers)
-	})
+func (r *Router) Head(relativePath string, handlers HandlerFunc) {
+	r.handle("HEAD", relativePath, handlers)
 }
 
 // Static serves files from the given file system root.
