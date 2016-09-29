@@ -17,8 +17,8 @@ type Router struct {
 
 func (r *Router) handle(method string, relativePath string, handlers HandlerFunc) {
 	namespace := r.calculateAbsolutePath(relativePath)
-	fn := func(w http.ResponseWriter, req *http.Request) {
-		ctx := r.engine.createContext(w, req, []HandlerFunc{handlers})
+	fn := func(rw http.ResponseWriter, req *http.Request) {
+		ctx := r.engine.createContext(rw, req, []HandlerFunc{handlers})
 		ctx.Next()
 		r.engine.reuseContext(ctx)
 	}
