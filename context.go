@@ -10,11 +10,10 @@ import (
 
 // Context the context of each request
 type Context struct {
-	Writer  http.ResponseWriter
-	Req     *http.Request
-	Session Session
-	Engine  *Engine
-	render  *render.Render
+	Writer http.ResponseWriter
+	Req    *http.Request
+	Engine *Engine
+	render *render.Render
 	// writer   writer
 	handlers []HandlerFunc
 	index    int8
