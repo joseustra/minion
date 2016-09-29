@@ -1,9 +1,9 @@
 package minion
 
-func lastChar(str string) uint8 {
+func lastChar(str string) (lc uint8) {
 	size := len(str)
 	if size == 0 {
-		panic("The length of the string can't be 0")
+		return lc
 	}
 	return str[size-1]
 }

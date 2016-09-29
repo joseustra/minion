@@ -14,6 +14,7 @@ import (
 	"github.com/mgutz/ansi"
 )
 
+// Request prepare and do the test request
 func Request(t *testing.T, ts *httptest.Server, method, path string, body io.Reader) (int, string) {
 	req, err := http.NewRequest(method, ts.URL+path, body)
 	if err != nil {
@@ -78,7 +79,7 @@ func AssertEqual(tb testing.TB, exp, act interface{}) {
 	}
 }
 
-// NotEquals fails the test if exp is not equal to act.
+// AssertNotEqual fails the test if exp is not equal to act.
 func AssertNotEqual(tb testing.TB, exp, act interface{}) {
 	if reflect.DeepEqual(exp, act) {
 		yellow := ansi.ColorFunc("yellow+h")
@@ -92,6 +93,24 @@ func AssertNotEqual(tb testing.TB, exp, act interface{}) {
 		fmt.Println(green, "Expected: ", exp, reset)
 		fmt.Println(red, "Got: ", act, reset)
 
+		tb.FailNow()
+	}
+}
+
+// AssertNil fails the test if exp is not equal to act.
+func AssertNil(tb testing.TB, exp interface{}) {
+	if exp != nil {
+		_, file, line, _ := runtime.Caller(1)
+		fmt.Printf("\033[31m%s:%d: expecting nil but got %v\033[39m\n\n", filepath.Base(file), line, exp)
+		tb.FailNow()
+	}
+}
+
+// AssertNotNil fails the test if exp is not equal to act.
+func AssertNotNil(tb testing.TB, exp interface{}) {
+	if exp == nil {
+		_, file, line, _ := runtime.Caller(1)
+		fmt.Printf("\033[31m%s:%d: expecting not nil but got nil\033[39m\n\n", filepath.Base(file), line)
 		tb.FailNow()
 	}
 }
