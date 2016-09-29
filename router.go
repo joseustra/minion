@@ -21,7 +21,7 @@ func (r *Router) handleContext(w http.ResponseWriter, req *http.Request, handler
 	r.engine.reuseContext(ctx)
 }
 
-// Post is a shortcut for router.Handle("POST", path, handle)
+// Post handle the POST requests
 func (r *Router) Post(relativePath string, handlers ...HandlerFunc) {
 	namespace := r.calculateAbsolutePath(relativePath)
 	r.mux.Post(namespace, func(w http.ResponseWriter, req *http.Request) {
@@ -29,7 +29,7 @@ func (r *Router) Post(relativePath string, handlers ...HandlerFunc) {
 	})
 }
 
-// Get is a shortcut for router.Handle("GET", path, handle)
+// Get handle the GET requets
 func (r *Router) Get(relativePath string, handlers ...HandlerFunc) {
 	namespace := r.calculateAbsolutePath(relativePath)
 	r.mux.Get(namespace, func(w http.ResponseWriter, req *http.Request) {
@@ -37,7 +37,7 @@ func (r *Router) Get(relativePath string, handlers ...HandlerFunc) {
 	})
 }
 
-// Delete is a shortcut for router.Handle("DELETE", path, handle)
+// Delete handle the DELETE requests
 func (r *Router) Delete(relativePath string, handlers ...HandlerFunc) {
 	namespace := r.calculateAbsolutePath(relativePath)
 	r.mux.Delete(namespace, func(w http.ResponseWriter, req *http.Request) {
@@ -45,7 +45,7 @@ func (r *Router) Delete(relativePath string, handlers ...HandlerFunc) {
 	})
 }
 
-// Patch is a shortcut for router.Handle("PATCH", path, handle)
+// Patch handle the PATCH requests
 func (r *Router) Patch(relativePath string, handlers ...HandlerFunc) {
 	namespace := r.calculateAbsolutePath(relativePath)
 	r.mux.Patch(namespace, func(w http.ResponseWriter, req *http.Request) {
@@ -53,7 +53,7 @@ func (r *Router) Patch(relativePath string, handlers ...HandlerFunc) {
 	})
 }
 
-// Put is a shortcut for router.Handle("PUT", path, handle)
+// Put handle the PUT requests
 func (r *Router) Put(relativePath string, handlers ...HandlerFunc) {
 	namespace := r.calculateAbsolutePath(relativePath)
 	r.mux.Put(namespace, func(w http.ResponseWriter, req *http.Request) {
@@ -61,7 +61,7 @@ func (r *Router) Put(relativePath string, handlers ...HandlerFunc) {
 	})
 }
 
-// Options is a shortcut for router.Handle("OPTIONS", path, handle)
+// Options handle the OPTIONS requests
 func (r *Router) Options(relativePath string, handlers ...HandlerFunc) {
 	namespace := r.calculateAbsolutePath(relativePath)
 	r.mux.Options(namespace, func(w http.ResponseWriter, req *http.Request) {
@@ -69,7 +69,7 @@ func (r *Router) Options(relativePath string, handlers ...HandlerFunc) {
 	})
 }
 
-// Head is a shortcut for router.Handle("HEAD", path, handle)
+// Head handle the HEAD requests
 func (r *Router) Head(relativePath string, handlers ...HandlerFunc) {
 	namespace := r.calculateAbsolutePath(relativePath)
 	r.mux.Head(namespace, func(w http.ResponseWriter, req *http.Request) {
@@ -78,7 +78,6 @@ func (r *Router) Head(relativePath string, handlers ...HandlerFunc) {
 }
 
 // Static serves files from the given file system root.
-// use : router.Static("/static", "/var/www")
 func (r *Router) Static(path, dir string) {
 	r.mux.FileServer(path, http.Dir(dir))
 }

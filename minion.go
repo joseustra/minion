@@ -17,6 +17,9 @@ var l = log.New(os.Stdout, "[minion] ", 0)
 // HandlerFunc TODO
 type HandlerFunc func(*Context)
 
+// Middleware middleware type
+type Middleware func(http.Handler) http.Handler
+
 // Engine TODO
 type Engine struct {
 	*Router
@@ -40,7 +43,7 @@ type Options struct {
 	Namespace             string
 }
 
-// New returns a new blank Engine instance without any middleware attached.
+// New returns a new blank Engine instance
 func New(opts Options) *Engine {
 	namespace := opts.Namespace
 	if len(namespace) == 0 {
@@ -71,7 +74,6 @@ func New(opts Options) *Engine {
 	engine.Use(Recovery)
 	engine.Use(Logger)
 	engine.Use(crs.Handler)
-	// engine.Use(AuthenticatedRoutes(opts.JWTToken, opts.UnauthenticatedRoutes))
 	return engine
 }
 
