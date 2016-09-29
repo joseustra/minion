@@ -43,7 +43,7 @@ type Options struct {
 	Namespace             string
 }
 
-// New returns a new blank Engine instance
+// New returns a new blank Engine instance with no middleware attached
 func New(opts Options) *Engine {
 	namespace := opts.Namespace
 	if len(namespace) == 0 {
@@ -67,6 +67,13 @@ func New(opts Options) *Engine {
 		return ctx
 	}
 
+	return engine
+}
+
+// Classic returns a new Engine instance with basic middlewares
+// Recovery, Logger, CORS and JWT
+func Classic(opts Options) *Engine {
+	engine := New(opts)
 	crs := cors.New(cors.Options{
 		AllowedOrigins: engine.options.Cors,
 	})
@@ -74,6 +81,7 @@ func New(opts Options) *Engine {
 	engine.Use(Recovery)
 	engine.Use(Logger)
 	engine.Use(crs.Handler)
+
 	return engine
 }
 
