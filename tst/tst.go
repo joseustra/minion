@@ -1,6 +1,8 @@
 package tst
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -69,6 +71,37 @@ func AssertEqual(tb testing.TB, exp, act interface{}) {
 		red := ansi.ColorCode("red+h:black")
 		reset := ansi.ColorCode("reset")
 
+		_, file, line, _ := runtime.Caller(1)
+
+		fmt.Println(yellow(fmt.Sprintf("%s:%d", filepath.Base(file), line)))
+		fmt.Println(green, "Expected: ", exp, reset)
+		fmt.Println(red, "     Got: ", act, reset)
+
+		tb.FailNow()
+	}
+}
+
+func AssertJSONBody(tb testing.TB, exp, act interface{}) {
+	red := ansi.ColorCode("red+h:black")
+	green := ansi.ColorCode("green+h:black")
+	yellow := ansi.ColorFunc("yellow+h")
+	reset := ansi.ColorCode("reset")
+
+	var actBuf bytes.Buffer
+	err := json.Indent(&actBuf, []byte(act.(string)), "", " ")
+	if err != nil {
+		fmt.Println(red, "Invalid json: ", act, reset)
+	}
+	act = string(actBuf.Bytes())
+
+	var expBuf bytes.Buffer
+	err = json.Indent(&expBuf, []byte(exp.(string)), "", " ")
+	if err != nil {
+		fmt.Println(red, "Invalid json: ", exp, reset)
+	}
+	exp = string(expBuf.Bytes())
+
+	if !reflect.DeepEqual(exp, act) {
 		_, file, line, _ := runtime.Caller(1)
 
 		fmt.Println(yellow(fmt.Sprintf("%s:%d", filepath.Base(file), line)))
