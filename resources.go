@@ -11,5 +11,7 @@ func (c *Context) GetResource(resource interface{}) error {
 	if err != nil {
 		return err
 	}
+	defer c.Req.Body.Close()
+
 	return json.Unmarshal(body, resource)
 }
