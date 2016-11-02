@@ -2,9 +2,11 @@ package minion_test
 
 import (
 	"bytes"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/goware/jwtauth"
 	"github.com/ustrajunior/minion"
 	"github.com/ustrajunior/minion/tst"
 )
@@ -27,10 +29,10 @@ func TestNamespace(t *testing.T) {
 
 	var status int
 
-	status, _ = tst.Request(t, ts, "GET", "/v1/users", nil)
+	status, _ = tst.Request(t, ts, "GET", "/v1/users", nil, nil)
 	tst.AssertEqual(t, 200, status)
 
-	status, _ = tst.Request(t, ts, "GET", "/users", nil)
+	status, _ = tst.Request(t, ts, "GET", "/users", nil, nil)
 	tst.AssertEqual(t, 404, status)
 }
 
@@ -87,13 +89,13 @@ func TestGet(t *testing.T) {
 	var j, body string
 	var status int
 
-	status, body = tst.Request(t, ts, "GET", "/users", nil)
+	status, body = tst.Request(t, ts, "GET", "/users", nil, nil)
 	tst.AssertEqual(t, 200, status)
 
 	j = `{"users":[{"name":"John Doe","email":"john@doe.com"},{"name":"Foo Bar","email":"foo@bar.com"}]}`
 	tst.AssertEqual(t, j, body)
 
-	status, body = tst.Request(t, ts, "GET", "/user/1", nil)
+	status, body = tst.Request(t, ts, "GET", "/user/1", nil, nil)
 	tst.AssertEqual(t, 200, status)
 
 	j = `{"id":"1","name":"John Doe","email":"john@doe.com"}`
@@ -128,7 +130,7 @@ func TestPost(t *testing.T) {
 	var status int
 
 	payload := `{"name":"John","email":"john@doe.com"}`
-	status, body = tst.Request(t, ts, "POST", "/users", bytes.NewBuffer([]byte(payload)))
+	status, body = tst.Request(t, ts, "POST", "/users", nil, bytes.NewBuffer([]byte(payload)))
 	tst.AssertEqual(t, 200, status)
 
 	j = `{"id":"1","name":"John","email":"john@doe.com"}`
@@ -164,7 +166,7 @@ func TestPatch(t *testing.T) {
 	var status int
 
 	payload := `{"email":"john@doe.com"}`
-	status, body = tst.Request(t, ts, "PATCH", "/users/1", bytes.NewBuffer([]byte(payload)))
+	status, body = tst.Request(t, ts, "PATCH", "/users/1", nil, bytes.NewBuffer([]byte(payload)))
 	tst.AssertEqual(t, 200, status)
 
 	j = `{"id":"1","name":"John","email":"john@doe.com"}`
@@ -201,7 +203,7 @@ func TestPut(t *testing.T) {
 	var status int
 
 	payload := `{"name":"John Doe","email":"john@doe.com"}`
-	status, body = tst.Request(t, ts, "PUT", "/users/1", bytes.NewBuffer([]byte(payload)))
+	status, body = tst.Request(t, ts, "PUT", "/users/1", nil, bytes.NewBuffer([]byte(payload)))
 	tst.AssertEqual(t, 200, status)
 
 	j = `{"id":"1","name":"John Doe","email":"john@doe.com"}`
@@ -225,7 +227,7 @@ func TestOptions(t *testing.T) {
 	var body string
 	var status int
 
-	status, body = tst.Request(t, ts, "OPTIONS", "/users", nil)
+	status, body = tst.Request(t, ts, "OPTIONS", "/users", nil, nil)
 	tst.AssertEqual(t, 200, status)
 
 	tst.AssertEqual(t, "", body)
@@ -248,7 +250,7 @@ func TestHead(t *testing.T) {
 	var body string
 	var status int
 
-	status, body = tst.Request(t, ts, "HEAD", "/users", nil)
+	status, body = tst.Request(t, ts, "HEAD", "/users", nil, nil)
 	tst.AssertEqual(t, 200, status)
 
 	tst.AssertEqual(t, "", body)
@@ -276,7 +278,102 @@ func TestDelete(t *testing.T) {
 	var j, body string
 	var status int
 
-	status, body = tst.Request(t, ts, "DELETE", "/users/1", nil)
+	status, body = tst.Request(t, ts, "DELETE", "/users/1", nil, nil)
+	tst.AssertEqual(t, 200, status)
+
+	j = `{"message":"ok"}`
+	tst.AssertEqual(t, j, body)
+}
+
+func TestJWTAuthentication(t *testing.T) {
+	m := minion.Classic(minion.Options{JWTToken: "123"})
+
+	usersHandler := func(ctx *minion.Context) {
+		j := struct {
+			Message string `json:"message"`
+		}{
+			"ok",
+		}
+		ctx.JSON(200, j)
+	}
+
+	m.Get("/users", usersHandler)
+
+	ts := httptest.NewServer(m)
+	defer ts.Close()
+
+	var j, body string
+	var status int
+
+	tokenString, _ := minion.CreateJWTToken(nil)
+
+	h := http.Header{}
+	h.Set("Authorization", "BEARER "+tokenString)
+
+	status, body = tst.Request(t, ts, "GET", "/users", h, nil)
+	tst.AssertEqual(t, 200, status)
+
+	j = `{"message":"ok"}`
+	tst.AssertEqual(t, j, body)
+}
+
+func TestJWTAuthenticationWrongToken(t *testing.T) {
+	m := minion.Classic(minion.Options{JWTToken: "123"})
+
+	usersHandler := func(ctx *minion.Context) {
+		j := struct {
+			Message string `json:"message"`
+		}{
+			"ok",
+		}
+		ctx.JSON(200, j)
+	}
+
+	m.Get("/users", usersHandler)
+
+	ts := httptest.NewServer(m)
+	defer ts.Close()
+
+	var j, body string
+	var status int
+
+	tokenAuth := jwtauth.New("HS256", []byte("wrong"), nil)
+	_, tokenString, _ := tokenAuth.Encode(nil)
+
+	h := http.Header{}
+	h.Set("Authorization", "BEARER "+tokenString)
+
+	status, body = tst.Request(t, ts, "GET", "/users", h, nil)
+	tst.AssertEqual(t, 401, status)
+
+	j = `{"status":401,"message":"Unauthorized"}`
+	tst.AssertEqual(t, j, body)
+}
+
+func TestJWTAuthenticationUnauthenticatedPath(t *testing.T) {
+	m := minion.Classic(minion.Options{
+		JWTToken:              "123",
+		UnauthenticatedRoutes: []string{"/unauthenticated"},
+	})
+
+	usersHandler := func(ctx *minion.Context) {
+		j := struct {
+			Message string `json:"message"`
+		}{
+			"ok",
+		}
+		ctx.JSON(200, j)
+	}
+
+	m.Get("/unauthenticated", usersHandler)
+
+	ts := httptest.NewServer(m)
+	defer ts.Close()
+
+	var j, body string
+	var status int
+
+	status, body = tst.Request(t, ts, "GET", "/unauthenticated", nil, nil)
 	tst.AssertEqual(t, 200, status)
 
 	j = `{"message":"ok"}`

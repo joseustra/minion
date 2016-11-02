@@ -1,0 +1,21 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "CMfwCFcZRDJeIVVbIHa6t4Aewl8=",
+			"path": "github.com/dgrijalva/jwt-go",
+			"revision": "268038b363c7a8d7306b8e35bf77a1fde4b0c402",
+			"revisionTime": "2016-06-16T19:14:24Z",
+			"version": "v2.7.0",
+			"versionExact": "v2.7.0"
+		},
+		{
+			"checksumSHA1": "3Tr5vY8q6riEe9DKkktm2fEidVU=",
+			"path": "github.com/goware/jwtauth",
+			"revision": "d5f87ca5c3b52eaf56cc8c70c545d8aadd7cbb0a",
+			"revisionTime": "2016-09-13T15:58:18Z"
+		}
+	],
+	"rootPath": "github.com/ustrajunior/minion"
+}

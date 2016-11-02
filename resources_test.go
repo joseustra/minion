@@ -2,7 +2,6 @@ package minion_test
 
 import (
 	"bytes"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -40,8 +39,6 @@ func TestGetResource(t *testing.T) {
 
 	ctx := &minion.Context{Req: req}
 	err := ctx.GetResource(&resource)
-
-	fmt.Println(resource)
 
 	tst.AssertNoError(t, err)
 	tst.AssertEqual(t, user, resource)

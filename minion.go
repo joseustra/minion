@@ -7,12 +7,15 @@ import (
 	"os"
 	"sync"
 
+	"github.com/goware/jwtauth"
 	"github.com/pressly/chi"
 	"github.com/rs/cors"
 	"github.com/unrolled/render"
 )
 
 var l = log.New(os.Stdout, "[minion] ", 0)
+
+var tokenAuth *jwtauth.JwtAuth
 
 // HandlerFunc TODO
 type HandlerFunc func(*Context)
@@ -78,9 +81,14 @@ func Classic(opts Options) *Engine {
 		AllowedOrigins: engine.options.Cors,
 	})
 
+	tokenAuth = jwtauth.New("HS256", []byte(opts.JWTToken), nil)
+	ctx := engine.pool.Get().(*Context)
+
 	engine.Use(Recovery)
 	engine.Use(Logger)
 	engine.Use(crs.Handler)
+	engine.Use(tokenAuth.Verifier)
+	engine.Use(ctx.Authenticator)
 
 	return engine
 }
