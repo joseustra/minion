@@ -4,6 +4,7 @@ import (
 	"math"
 	"net/http"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/google/jsonapi"
 	"github.com/unrolled/render"
 )
@@ -104,4 +105,16 @@ func (c *Engine) createContext(rw http.ResponseWriter, req *http.Request, handle
 
 func (c *Engine) reuseContext(ctx *Context) {
 	c.pool.Put(ctx)
+}
+
+// GetClaims returns the claims
+func (c *Context) GetClaims() map[string]interface{} {
+	ctx := c.Req.Context()
+
+	jwtToken, ok := ctx.Value("jwt").(*jwt.Token)
+	if !ok {
+		return nil
+	}
+
+	return jwtToken.Claims
 }
