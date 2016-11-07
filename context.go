@@ -76,6 +76,11 @@ func (c *Context) HTML(status int, tmpl string, data interface{}) {
 	c.render.HTML(c.Writer, status, tmpl, data)
 }
 
+// Data writes out the raw bytes as binary data and sets the Content-Type to "text/html".
+func (c *Context) Data(status int, data []byte) {
+	c.render.Data(c.Writer, status, data)
+}
+
 // MarshalOnePayload marshal the struct and return as jsonaapi
 func (c *Context) MarshalOnePayload(status int, model interface{}) {
 	c.Writer.WriteHeader(status)
