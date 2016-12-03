@@ -13,4 +13,5 @@ ratings:
     - "**.go"
 
 exclude_paths:
-- "**/vendor/**/*"
+  - "**_test.go"
+  - "**/vendor/**/*"
