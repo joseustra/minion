@@ -78,7 +78,9 @@ func New(opts Options) *Engine {
 func Classic(opts Options) *Engine {
 	engine := New(opts)
 	crs := cors.New(cors.Options{
-		AllowedOrigins: engine.options.Cors,
+		AllowedOrigins:   engine.options.Cors,
+		AllowedHeaders:   []string{"Origin", "X-Requested-With", "Content-Type", "Accept"},
+		AllowCredentials: true,
 	})
 
 	tokenAuth = jwtauth.New("HS256", []byte(opts.JWTToken), nil)
