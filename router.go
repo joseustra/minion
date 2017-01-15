@@ -15,6 +15,11 @@ type Router struct {
 	mux       *chi.Mux
 }
 
+// Mount attaches a http.Handler to a given path.
+func (r *Router) Mount(relativePath string, handler http.Handler) {
+	r.mux.Mount(relativePath, handler)
+}
+
 func (r *Router) handle(method string, relativePath string, handlers HandlerFunc) {
 	namespace := r.calculateAbsolutePath(relativePath)
 	fn := func(rw http.ResponseWriter, req *http.Request) {
@@ -24,6 +29,8 @@ func (r *Router) handle(method string, relativePath string, handlers HandlerFunc
 	}
 
 	switch method {
+	case "ALL":
+		r.mux.HandleFunc(namespace, fn)
 	case "GET":
 		r.mux.Get(namespace, fn)
 	case "POST":
@@ -74,6 +81,11 @@ func (r *Router) Options(relativePath string, handlers HandlerFunc) {
 // Head handle the HEAD requests
 func (r *Router) Head(relativePath string, handlers HandlerFunc) {
 	r.handle("HEAD", relativePath, handlers)
+}
+
+// Handle handle all paths to any http method
+func (r *Router) Handle(relativePath string, handlers HandlerFunc) {
+	r.handle("ALL", relativePath, handlers)
 }
 
 // Static serves files from the given file system root.
