@@ -2,6 +2,7 @@ package minion
 
 import (
 	"net/http"
+	"regexp"
 
 	jwt "github.com/dgrijalva/jwt-go"
 )
@@ -19,7 +20,8 @@ func (c *Context) Authenticator(next http.Handler) http.Handler {
 		unauthenticated := false
 
 		for _, path := range c.Engine.options.UnauthenticatedRoutes {
-			if path == "*" || req.URL.Path == path {
+			re := regexp.MustCompile(path)
+			if re.MatchString(req.URL.Path) {
 				unauthenticated = true
 			}
 		}
