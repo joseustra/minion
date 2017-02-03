@@ -3,6 +3,7 @@ package minion
 import (
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"sync"
@@ -110,19 +111,11 @@ func (c *Engine) Run(port int) error {
 
 	addr := fmt.Sprintf(":%d", port)
 	l.Printf("Starting server on port [%d]\n", port)
-	if err := http.ListenAndServe(addr, c); err != nil {
+	listen, err := net.Listen("tcp", addr)
+	if err != nil {
 		return err
 	}
-	return nil
-}
-
-// RunTLS run the https server.
-func (c *Engine) RunTLS(port int, cert string, key string) error {
-	addr := fmt.Sprintf(":%d", port)
-	l.Printf("Starting server on port [%d]\n", port)
-	if err := http.ListenAndServeTLS(addr, cert, key, c); err != nil {
-		return err
-	}
+	http.Serve(listen, c)
 	return nil
 }
 
