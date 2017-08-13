@@ -7,34 +7,10 @@ import (
 	"testing"
 
 	"github.com/goware/jwtauth"
+	"github.com/stretchr/testify/assert"
 	"github.com/ustrajunior/minion"
 	"github.com/ustrajunior/minion/tst"
 )
-
-func TestNamespace(t *testing.T) {
-
-	usersHandler := func(ctx *minion.Context) {
-		ctx.JSON(200, nil)
-	}
-
-	m := minion.New(minion.Options{
-		UnauthenticatedRoutes: []string{"*"},
-		Namespace:             "/v1"},
-	)
-
-	m.Get("/users", usersHandler)
-
-	ts := httptest.NewServer(m)
-	defer ts.Close()
-
-	var status int
-
-	status, _ = tst.Request(t, ts, "GET", "/v1/users", nil, nil)
-	tst.AssertEqual(t, 200, status)
-
-	status, _ = tst.Request(t, ts, "GET", "/users", nil, nil)
-	tst.AssertEqual(t, 404, status)
-}
 
 func TestGet(t *testing.T) {
 	john := struct {
@@ -76,12 +52,10 @@ func TestGet(t *testing.T) {
 		ctx.JSON(200, doe)
 	}
 
-	m := minion.New(minion.Options{
-		UnauthenticatedRoutes: []string{"*"}},
-	)
+	m := minion.New(minion.Options{})
 
 	m.Get("/users", usersHandler)
-	m.Get("/user/:id", userHandler)
+	m.Get("/user/{id}", userHandler)
 
 	ts := httptest.NewServer(m)
 	defer ts.Close()
@@ -90,16 +64,16 @@ func TestGet(t *testing.T) {
 	var status int
 
 	status, body = tst.Request(t, ts, "GET", "/users", nil, nil)
-	tst.AssertEqual(t, 200, status)
+	assert.Equal(t, 200, status)
 
 	j = `{"users":[{"name":"John Doe","email":"john@doe.com"},{"name":"Foo Bar","email":"foo@bar.com"}]}`
-	tst.AssertEqual(t, j, body)
+	assert.Equal(t, j, body)
 
 	status, body = tst.Request(t, ts, "GET", "/user/1", nil, nil)
-	tst.AssertEqual(t, 200, status)
+	assert.Equal(t, 200, status)
 
 	j = `{"id":"1","name":"John Doe","email":"john@doe.com"}`
-	tst.AssertEqual(t, j, body)
+	assert.Equal(t, j, body)
 }
 
 func TestPost(t *testing.T) {
@@ -131,10 +105,10 @@ func TestPost(t *testing.T) {
 
 	payload := `{"name":"John","email":"john@doe.com"}`
 	status, body = tst.Request(t, ts, "POST", "/users", nil, bytes.NewBuffer([]byte(payload)))
-	tst.AssertEqual(t, 200, status)
+	assert.Equal(t, 200, status)
 
 	j = `{"id":"1","name":"John","email":"john@doe.com"}`
-	tst.AssertEqual(t, j, body)
+	assert.Equal(t, j, body)
 }
 
 func TestPatch(t *testing.T) {
@@ -157,7 +131,7 @@ func TestPatch(t *testing.T) {
 		ctx.JSON(200, dbUser)
 	}
 
-	m.Patch("/users/:id", userHandler)
+	m.Patch("/users/{id}", userHandler)
 
 	ts := httptest.NewServer(m)
 	defer ts.Close()
@@ -167,10 +141,10 @@ func TestPatch(t *testing.T) {
 
 	payload := `{"email":"john@doe.com"}`
 	status, body = tst.Request(t, ts, "PATCH", "/users/1", nil, bytes.NewBuffer([]byte(payload)))
-	tst.AssertEqual(t, 200, status)
+	assert.Equal(t, 200, status)
 
 	j = `{"id":"1","name":"John","email":"john@doe.com"}`
-	tst.AssertEqual(t, j, body)
+	assert.Equal(t, j, body)
 }
 
 func TestPut(t *testing.T) {
@@ -194,7 +168,7 @@ func TestPut(t *testing.T) {
 		ctx.JSON(200, dbUser)
 	}
 
-	m.Put("/users/:id", userHandler)
+	m.Put("/users/{id}", userHandler)
 
 	ts := httptest.NewServer(m)
 	defer ts.Close()
@@ -204,10 +178,10 @@ func TestPut(t *testing.T) {
 
 	payload := `{"name":"John Doe","email":"john@doe.com"}`
 	status, body = tst.Request(t, ts, "PUT", "/users/1", nil, bytes.NewBuffer([]byte(payload)))
-	tst.AssertEqual(t, 200, status)
+	assert.Equal(t, 200, status)
 
 	j = `{"id":"1","name":"John Doe","email":"john@doe.com"}`
-	tst.AssertEqual(t, j, body)
+	assert.Equal(t, j, body)
 }
 
 func TestOptions(t *testing.T) {
@@ -228,9 +202,9 @@ func TestOptions(t *testing.T) {
 	var status int
 
 	status, body = tst.Request(t, ts, "OPTIONS", "/users", nil, nil)
-	tst.AssertEqual(t, 200, status)
+	assert.Equal(t, 200, status)
 
-	tst.AssertEqual(t, "", body)
+	assert.Equal(t, "", body)
 }
 
 func TestHead(t *testing.T) {
@@ -251,9 +225,9 @@ func TestHead(t *testing.T) {
 	var status int
 
 	status, body = tst.Request(t, ts, "HEAD", "/users", nil, nil)
-	tst.AssertEqual(t, 200, status)
+	assert.Equal(t, 200, status)
 
-	tst.AssertEqual(t, "", body)
+	assert.Equal(t, "", body)
 }
 
 func TestDelete(t *testing.T) {
@@ -270,7 +244,7 @@ func TestDelete(t *testing.T) {
 		ctx.JSON(200, j)
 	}
 
-	m.Delete("/users/:id", userHandler)
+	m.Delete("/users/{id}", userHandler)
 
 	ts := httptest.NewServer(m)
 	defer ts.Close()
@@ -279,10 +253,10 @@ func TestDelete(t *testing.T) {
 	var status int
 
 	status, body = tst.Request(t, ts, "DELETE", "/users/1", nil, nil)
-	tst.AssertEqual(t, 200, status)
+	assert.Equal(t, 200, status)
 
 	j = `{"message":"ok"}`
-	tst.AssertEqual(t, j, body)
+	assert.Equal(t, j, body)
 }
 
 func TestJWTAuthentication(t *testing.T) {
@@ -311,10 +285,10 @@ func TestJWTAuthentication(t *testing.T) {
 	h.Set("Authorization", "BEARER "+tokenString)
 
 	status, body = tst.Request(t, ts, "GET", "/users", h, nil)
-	tst.AssertEqual(t, 200, status)
+	assert.Equal(t, 200, status)
 
 	j = `{"message":"ok"}`
-	tst.AssertEqual(t, j, body)
+	assert.Equal(t, j, body)
 }
 
 func TestJWTAuthenticationWrongToken(t *testing.T) {
@@ -344,10 +318,10 @@ func TestJWTAuthenticationWrongToken(t *testing.T) {
 	h.Set("Authorization", "BEARER "+tokenString)
 
 	status, body = tst.Request(t, ts, "GET", "/users", h, nil)
-	tst.AssertEqual(t, 401, status)
+	assert.Equal(t, 401, status)
 
 	j = `{"status":401,"message":"Unauthorized"}`
-	tst.AssertEqual(t, j, body)
+	assert.Equal(t, j, body)
 }
 
 func TestJWTAuthenticationUnauthenticatedPath(t *testing.T) {
@@ -374,8 +348,8 @@ func TestJWTAuthenticationUnauthenticatedPath(t *testing.T) {
 	var status int
 
 	status, body = tst.Request(t, ts, "GET", "/unauthenticated", nil, nil)
-	tst.AssertEqual(t, 200, status)
+	assert.Equal(t, 200, status)
 
 	j = `{"message":"ok"}`
-	tst.AssertEqual(t, j, body)
+	assert.Equal(t, j, body)
 }

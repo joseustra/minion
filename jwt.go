@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"regexp"
 
-	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/goware/jwtauth"
 )
 
 // CreateJWTToken creates a jwt token with the given secret
@@ -14,12 +14,12 @@ func CreateJWTToken(claims map[string]interface{}) (string, error) {
 	return tokenString, err
 }
 
-// Authenticator ...
+// Authenticator validates the jwt token and return 401 if not
 func (c *Context) Authenticator(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		unauthenticated := false
 
-		for _, path := range c.Engine.options.UnauthenticatedRoutes {
+		for _, path := range c.app.options.UnauthenticatedRoutes {
 			re := regexp.MustCompile(path)
 			if re.MatchString(req.URL.Path) {
 				unauthenticated = true
@@ -34,18 +34,14 @@ func (c *Context) Authenticator(next http.Handler) http.Handler {
 				http.StatusUnauthorized,
 				http.StatusText(http.StatusUnauthorized),
 			}
+			token, _, err := jwtauth.FromContext(req.Context())
 
-			ctx := req.Context()
-
-			if jwtErr, ok := ctx.Value("jwt.err").(error); ok {
-				if jwtErr != nil {
-					c.render.JSON(rw, http.StatusUnauthorized, errResp)
-					return
-				}
+			if err != nil {
+				c.render.JSON(rw, http.StatusUnauthorized, errResp)
+				return
 			}
 
-			jwtToken, ok := ctx.Value("jwt").(*jwt.Token)
-			if !ok || jwtToken == nil || !jwtToken.Valid {
+			if token == nil || !token.Valid {
 				c.render.JSON(rw, http.StatusUnauthorized, errResp)
 				return
 			}

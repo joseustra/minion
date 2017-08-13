@@ -4,28 +4,22 @@ import (
 	"net/http"
 	"path"
 
-	"github.com/pressly/chi"
+	"github.com/go-chi/chi"
 )
 
-// Router TODO
 type Router struct {
-	Handlers  []HandlerFunc
-	namespace string
-	engine    *Engine
 	mux       *chi.Mux
+	app       *App
+	namespace string
 }
 
-// Mount attaches a http.Handler to a given path.
-func (r *Router) Mount(relativePath string, handler http.Handler) {
-	r.mux.Mount(relativePath, handler)
-}
-
-func (r *Router) handle(method string, relativePath string, handlers HandlerFunc) {
+func (r *Router) handle(method string, relativePath string, handler HandlerFunc) {
 	namespace := r.calculateAbsolutePath(relativePath)
+
 	fn := func(rw http.ResponseWriter, req *http.Request) {
-		ctx := r.engine.createContext(rw, req, []HandlerFunc{handlers})
-		ctx.Next()
-		r.engine.reuseContext(ctx)
+		ctx := r.app.createContext(rw, req, handler)
+		ctx.Execute()
+		r.app.reuseContext(ctx)
 	}
 
 	switch method {
@@ -49,48 +43,51 @@ func (r *Router) handle(method string, relativePath string, handlers HandlerFunc
 }
 
 // Post handle the POST requests
-func (r *Router) Post(relativePath string, handlers HandlerFunc) {
-	r.handle("POST", relativePath, handlers)
+func (r *Router) Post(relativePath string, handler HandlerFunc) {
+	r.handle("POST", relativePath, handler)
+
 }
 
 // Get handle the GET requets
-func (r *Router) Get(relativePath string, handlers HandlerFunc) {
-	r.handle("GET", relativePath, handlers)
+func (r *Router) Get(relativePath string, handler HandlerFunc) {
+	r.handle("GET", relativePath, handler)
+
 }
 
 // Delete handle the DELETE requests
-func (r *Router) Delete(relativePath string, handlers HandlerFunc) {
-	r.handle("DELETE", relativePath, handlers)
+func (r *Router) Delete(relativePath string, handler HandlerFunc) {
+	r.handle("DELETE", relativePath, handler)
+
 }
 
 // Patch handle the PATCH requests
-func (r *Router) Patch(relativePath string, handlers HandlerFunc) {
-	r.handle("PATCH", relativePath, handlers)
+func (r *Router) Patch(relativePath string, handler HandlerFunc) {
+	r.handle("PATCH", relativePath, handler)
+
 }
 
 // Put handle the PUT requests
-func (r *Router) Put(relativePath string, handlers HandlerFunc) {
-	r.handle("PUT", relativePath, handlers)
+func (r *Router) Put(relativePath string, handler HandlerFunc) {
+	r.handle("PUT", relativePath, handler)
+
 }
 
 // Options handle the OPTIONS requests
-func (r *Router) Options(relativePath string, handlers HandlerFunc) {
-	r.handle("OPTIONS", relativePath, handlers)
+func (r *Router) Options(relativePath string, handler HandlerFunc) {
+	r.handle("OPTIONS", relativePath, handler)
+
 }
 
 // Head handle the HEAD requests
-func (r *Router) Head(relativePath string, handlers HandlerFunc) {
-	r.handle("HEAD", relativePath, handlers)
+func (r *Router) Head(relativePath string, handler HandlerFunc) {
+	r.handle("HEAD", relativePath, handler)
+
 }
 
 // Handle handle all paths to any http method
-func (r *Router) Handle(relativePath string, handlers HandlerFunc) {
-	r.handle("ALL", relativePath, handlers)
-}
+func (r *Router) Handle(relativePath string, handler HandlerFunc) {
+	r.handle("ALL", relativePath, handler)
 
-// Static serves files from the given file system root.
-func (r *Router) Static(path, dir string) {
-	r.mux.FileServer(path, http.Dir(dir))
 }
 
 func (r *Router) calculateAbsolutePath(relativePath string) string {

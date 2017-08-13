@@ -8,62 +8,51 @@ import (
 	"os"
 	"sync"
 
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"github.com/goware/jwtauth"
-	"github.com/pressly/chi"
 	"github.com/rs/cors"
 	"github.com/unrolled/render"
 )
 
 var l = log.New(os.Stdout, "[minion] ", 0)
 
-var tokenAuth *jwtauth.JwtAuth
-
-// HandlerFunc TODO
 type HandlerFunc func(*Context)
-
-// Middleware middleware type
 type Middleware func(http.Handler) http.Handler
 
-// Engine TODO
-type Engine struct {
-	*Router
-	parent      *Router
-	middlewares []Middleware
-	pool        sync.Pool
-	options     Options
-}
+var tokenAuth *jwtauth.JwtAuth
 
-// Version api version
-func Version() string {
-	return "0.0.1"
+type App struct {
+	*Router
+	c       *Context
+	pool    sync.Pool
+	options Options
 }
 
 // Options defines the options to start the API
 type Options struct {
 	Cors                  []string
 	JWTToken              string
-	DisableJSONApi        bool
 	UnauthenticatedRoutes []string
 	Namespace             string
 }
 
-// New returns a new blank Engine instance with no middleware attached
-func New(opts Options) *Engine {
+func New(opts Options) *App {
 	namespace := opts.Namespace
 	if len(namespace) == 0 {
 		namespace = "/"
 	}
 
-	engine := &Engine{}
-	engine.Router = &Router{
-		namespace: namespace,
-		engine:    engine,
-		mux:       chi.NewRouter(),
+	app := &App{}
+	app.Router = &Router{
+		app: app,
+		mux: chi.NewRouter(),
 	}
-	engine.options = opts
-	engine.pool.New = func() interface{} {
+
+	app.options = opts
+	app.pool.New = func() interface{} {
 		ctx := &Context{
-			Engine: engine,
+			app: app,
 			render: render.New(render.Options{
 				Layout: "layout",
 			}),
@@ -71,70 +60,51 @@ func New(opts Options) *Engine {
 		return ctx
 	}
 
-	return engine
+	return app
 }
 
 // Classic returns a new Engine instance with basic middlewares
 // Recovery, Logger, CORS and JWT
-func Classic(opts Options) *Engine {
-	engine := New(opts)
+func Classic(opts Options) *App {
+	app := New(opts)
+
 	crs := cors.New(cors.Options{
-		AllowedOrigins:   engine.options.Cors,
+		AllowedOrigins:   app.options.Cors,
 		AllowedHeaders:   []string{"Origin", "X-Requested-With", "Content-Type", "Accept"},
 		AllowCredentials: true,
 	})
 
 	tokenAuth = jwtauth.New("HS256", []byte(opts.JWTToken), nil)
-	ctx := engine.pool.Get().(*Context)
+	ctx := app.pool.Get().(*Context)
 
-	engine.Use(Recovery)
-	engine.Use(Logger)
-	engine.Use(crs.Handler)
-	engine.Use(tokenAuth.Verifier)
-	engine.Use(ctx.Authenticator)
+	app.Use(middleware.Recoverer)
+	app.Use(Logger)
+	app.Use(crs.Handler)
+	app.Use(jwtauth.Verifier(tokenAuth))
+	app.Use(ctx.Authenticator)
 
-	return engine
+	return app
 }
 
-// Use add middlewares to be used on applicaton
-func (c *Engine) Use(middleware Middleware) {
-	c.Router.mux.Use(middleware)
+func (app *App) Use(md Middleware) {
+	app.Router.mux.Use(md)
 }
 
-// ServeHTTP makes the router implement the http.Handler interface.
-func (c *Engine) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	c.Router.mux.ServeHTTP(res, req)
+func (app *App) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	app.Router.mux.ServeHTTP(rw, req)
 }
 
-// Run run the http server.
-func (c *Engine) Run(port int) error {
-
+func (app *App) Run(port int) error {
 	addr := fmt.Sprintf(":%d", port)
-	l.Printf("Starting server on port [%d]\n", port)
+	log.Printf("Starting server on port [%d]\n", port)
 	listen, err := net.Listen("tcp", addr)
 	if err != nil {
 		return err
 	}
-	http.Serve(listen, c)
-	return nil
+
+	return http.Serve(listen, app)
 }
 
-const (
-	// DEV runs the server in development mode
-	DEV string = "development"
-	// PROD runs the server in production mode
-	PROD string = "production"
-	// TEST runs the server in test mode
-	TEST string = "test"
-)
-
-// MinionEnv is the environment that Minion is executing in.
-// The MINION_ENV is read on initialization to set this variable.
-var MinionEnv = DEV
-
-func init() {
-	env := os.Getenv("MINION_ENV")
-	if len(env) > 0 {
-		MinionEnv = env
-	}
+func (app *App) reuseContext(ctx *Context) {
+	app.pool.Put(ctx)
 }
