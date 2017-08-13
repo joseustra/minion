@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/goware/jwtauth"
+	"github.com/go-chi/jwtauth"
 	"github.com/rs/cors"
 	"github.com/unrolled/render"
 )

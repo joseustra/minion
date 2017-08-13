@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/goware/jwtauth"
+	"github.com/go-chi/jwtauth"
 	"github.com/stretchr/testify/assert"
 	"github.com/ustrajunior/minion"
 	"github.com/ustrajunior/minion/tst"

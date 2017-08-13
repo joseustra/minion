@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"regexp"
 
-	"github.com/goware/jwtauth"
+	"github.com/go-chi/jwtauth"
 )
 
 // CreateJWTToken creates a jwt token with the given secret
