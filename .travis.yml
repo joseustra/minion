@@ -1,7 +1,13 @@
 language: go
 
 go:
-  - 1.7
+  - 1.7.x
+  - 1.8.x
+  - tip
+
+script:
+  - go get -d -t ./...
+  - go test $(go list ./... | grep -v /vendor/)
 
 addons:
     code_climate:
