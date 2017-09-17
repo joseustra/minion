@@ -35,6 +35,7 @@ type Options struct {
 	JWTToken              string
 	UnauthenticatedRoutes []string
 	Namespace             string
+	Authenticator         func(next http.Handler) http.Handler
 }
 
 func New(opts Options) *App {
@@ -70,7 +71,7 @@ func Classic(opts Options) *App {
 
 	crs := cors.New(cors.Options{
 		AllowedOrigins:   app.options.Cors,
-		AllowedHeaders:   []string{"Origin", "X-Requested-With", "Content-Type", "Accept"},
+		AllowedHeaders:   []string{"Authorization", "Origin", "X-Requested-With", "Content-Type", "Accept"},
 		AllowCredentials: true,
 	})
 
@@ -81,7 +82,11 @@ func Classic(opts Options) *App {
 	app.Use(Logger)
 	app.Use(crs.Handler)
 	app.Use(jwtauth.Verifier(tokenAuth))
-	app.Use(ctx.Authenticator)
+	if opts.Authenticator != nil {
+		app.Use(opts.Authenticator)
+	} else {
+		app.Use(ctx.Authenticator)
+	}
 
 	return app
 }
