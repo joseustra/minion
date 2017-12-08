@@ -2,7 +2,7 @@ package minion
 
 // AllRoutes a shortcut to be used on the UnauthenticatedRoutes when
 // you want to have all your routes without jwt verification
-const AllRoutes = "^.*$"
+var AllRoutes = []string{"^.*$"}
 
 func lastChar(str string) (lc uint8) {
 	size := len(str)
