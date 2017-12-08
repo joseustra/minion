@@ -45,49 +45,41 @@ func (r *Router) handle(method string, relativePath string, handler HandlerFunc)
 // Post handle the POST requests
 func (r *Router) Post(relativePath string, handler HandlerFunc) {
 	r.handle("POST", relativePath, handler)
-
 }
 
 // Get handle the GET requets
 func (r *Router) Get(relativePath string, handler HandlerFunc) {
 	r.handle("GET", relativePath, handler)
-
 }
 
 // Delete handle the DELETE requests
 func (r *Router) Delete(relativePath string, handler HandlerFunc) {
 	r.handle("DELETE", relativePath, handler)
-
 }
 
 // Patch handle the PATCH requests
 func (r *Router) Patch(relativePath string, handler HandlerFunc) {
 	r.handle("PATCH", relativePath, handler)
-
 }
 
 // Put handle the PUT requests
 func (r *Router) Put(relativePath string, handler HandlerFunc) {
 	r.handle("PUT", relativePath, handler)
-
 }
 
 // Options handle the OPTIONS requests
 func (r *Router) Options(relativePath string, handler HandlerFunc) {
 	r.handle("OPTIONS", relativePath, handler)
-
 }
 
 // Head handle the HEAD requests
 func (r *Router) Head(relativePath string, handler HandlerFunc) {
 	r.handle("HEAD", relativePath, handler)
-
 }
 
 // Handle handle all paths to any http method
 func (r *Router) Handle(relativePath string, handler HandlerFunc) {
 	r.handle("ALL", relativePath, handler)
-
 }
 
 func (r *Router) calculateAbsolutePath(relativePath string) string {
