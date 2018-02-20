@@ -16,8 +16,8 @@
 [[projects]]
   name = "github.com/go-chi/chi"
   packages = [".","middleware"]
-  revision = "25354a53cca531cb2efd3f1d3c565d90ff04d802"
-  version = "v3.1.5"
+  revision = "e83ac2304db3c50cf03d96a2fcd39009d458bc35"
+  version = "v3.3.2"
 
 [[projects]]
   name = "github.com/go-chi/jwtauth"

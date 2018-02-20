@@ -3,6 +3,7 @@ package minion
 import (
 	"net/http"
 	"path"
+	"strings"
 
 	"github.com/go-chi/chi"
 )
@@ -80,6 +81,24 @@ func (r *Router) Head(relativePath string, handler HandlerFunc) {
 // Handle handle all paths to any http method
 func (r *Router) Handle(relativePath string, handler HandlerFunc) {
 	r.handle("ALL", relativePath, handler)
+}
+
+func (r *Router) StaticServer(path string, root http.FileSystem) {
+	if strings.ContainsAny(path, "{}*") {
+		panic("FileServer does not permit URL parameters.")
+	}
+
+	fs := http.StripPrefix(path, http.FileServer(root))
+
+	if path != "/" && path[len(path)-1] != '/' {
+		r.mux.Get(path, http.RedirectHandler(path+"/", http.StatusTemporaryRedirect).ServeHTTP)
+		path += "/"
+	}
+	path += "*"
+
+	r.mux.Get(path, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fs.ServeHTTP(w, r)
+	}))
 }
 
 func (r *Router) calculateAbsolutePath(relativePath string) string {
