@@ -20,7 +20,7 @@ var l = log.New(os.Stdout, "[minion] ", 0)
 type HandlerFunc func(*Context)
 type Middleware func(http.Handler) http.Handler
 
-var tokenAuth *jwtauth.JwtAuth
+var tokenAuth *jwtauth.JWTAuth
 
 type App struct {
 	*Router
