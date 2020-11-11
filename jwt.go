@@ -4,11 +4,12 @@ import (
 	"net/http"
 	"regexp"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/jwtauth"
 )
 
 // CreateJWTToken creates a jwt token with the given secret
-func CreateJWTToken(claims map[string]interface{}) (string, error) {
+func CreateJWTToken(claims jwt.Claims) (string, error) {
 	_, tokenString, err := tokenAuth.Encode(claims)
 
 	return tokenString, err
